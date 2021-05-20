@@ -134,6 +134,7 @@ export default class MarkersPlugin {
         let marker = {
             time: params.time,
             label: params.label,
+            hasPoint: params.hasPoint && true,
             color: params.color || DEFAULT_FILL_COLOR,
             position: params.position || DEFAULT_POSITION
         };
@@ -219,9 +220,11 @@ export default class MarkersPlugin {
         el.appendChild(line);
 
         const labelDiv = document.createElement('div');
-        const point = this._createPointerSVG(marker.color, marker.position);
-        labelDiv.appendChild(point);
-
+        if (marker.hasPoint){
+            const point = this._createPointerSVG(marker.color, marker.position);
+            labelDiv.appendChild(point);
+        }
+        
         if ( label ) {
             const labelEl = document.createElement('span');
             labelEl.innerText = label;
