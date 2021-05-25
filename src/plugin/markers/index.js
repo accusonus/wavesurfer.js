@@ -92,6 +92,7 @@ export default class MarkersPlugin {
             window.addEventListener('resize', this._onResize, true);
             window.addEventListener('orientationchange', this._onResize, true);
             this.wavesurfer.on('zoom', this._onResize);
+            this.wavesurfer.on('audioprocess', this._onPassBy());
         };
 
         this.markers = [];
@@ -99,6 +100,30 @@ export default class MarkersPlugin {
             this.wrapper = this.wavesurfer.drawer.wrapper;
             this._updateMarkerPositions();
         };
+
+        this._onPassBy = () => {
+            var waiting = false;
+            var task = function () {
+                if (!waiting) {
+                    for(var marker of this.markers){
+                        if(Math.abs(Math.round(marker.time*1000) - Math.round(this.wavesurfer.getCurrentTime()*1000)) < 20){
+                            this._passByMarker();
+                        return;
+                        }
+                    }
+                    waiting = true;
+                    setTimeout(function () {
+                        waiting = false;
+                    }, 10);
+                }
+            }
+            return task.bind(this);
+        }
+
+        this._passByMarker = this.wavesurfer.util.debounce(()=> {
+            this.fireEvent('pass-by-marker');
+        },50,true);
+
     }
 
     init() {
@@ -117,6 +142,8 @@ export default class MarkersPlugin {
         this.wavesurfer.un('backend-created', this._onBackendCreated);
 
         this.wavesurfer.un('zoom', this._onResize);
+
+        this.wavesurfer.un('audioprocess', this._onPassBy);
 
         window.removeEventListener('resize', this._onResize, true);
         window.removeEventListener('orientationchange', this._onResize, true);
