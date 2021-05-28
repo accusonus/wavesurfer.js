@@ -214,7 +214,6 @@ export default class MarkersPlugin {
             "margin-top": "-6px",
             background: marker.color,
             width: "1px",
-            cursor: "pointer",
             opacity: 0.8
         });
         el.appendChild(line);
